@@ -4,9 +4,12 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
+    jvm()
+
     js {
         browser()
         binaries.executable()
@@ -20,6 +23,16 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.kotlinx.serializationCore)
+            implementation(libs.kotlinx.serializationJson)
+
+            implementation(libs.ktor.clientCore)
+            implementation(libs.ktor.clientCio)
+            implementation(libs.ktor.clientLogging)
+            implementation(libs.ktor.clientContentNegotiation)
+            implementation(libs.ktor.clientJson)
+            implementation(libs.ktor.clientSerialization)
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -31,6 +44,8 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+
+            implementation(libs.ktor.clientMock)
         }
     }
 }

@@ -54,7 +54,7 @@ class MbtaApiClient(engine: HttpClientEngine) {
                 val id = escalatorJson["id"].content().orEmpty()
                 val directionString =
                     escalatorJson["attributes"]["properties"].findObject { it["name"].content() == "direction" }["value"].content()
-                val description = escalatorJson["attributes"]["long_name"].content().orEmpty()
+                val description = escalatorJson["attributes"]["short_name"].content().orEmpty()
                 val alert = alertedEscalators?.get(id).content()
 
                 Escalator(

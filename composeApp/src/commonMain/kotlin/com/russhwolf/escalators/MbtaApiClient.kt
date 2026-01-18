@@ -3,7 +3,7 @@ package com.russhwolf.escalators
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -19,12 +19,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-
-suspend fun main() {
-    MbtaApiClient(CIO.create()).getPorterEscalatorStatus().forEach {
-        println("Escalator ${it.description} (direction=${it.direction}) has status: ${it.status}")
-    }
-}
 
 private const val PorterSquareId = "place-portr"
 private val BigEscalatorIds = arrayOf("509", "510", "511")
@@ -46,34 +40,40 @@ class MbtaApiClient(engine: HttpClientEngine) {
         }
     }
 
-    suspend fun getPorterEscalatorStatus(): List<Escalator> = coroutineScope {
-        val escalatorsJsonDeferred = async { getEscalators(PorterSquareId) }
-        val alertsJsonDeferred = async { getEscalatorAlerts(PorterSquareId, *BigEscalatorIds) }
-        val (escalatorsJson, alertsJson) = awaitAll(escalatorsJsonDeferred, alertsJsonDeferred)
+    suspend fun getPorterEscalatorStatus(): EscalatorResponse = try {
+        coroutineScope {
+            val escalatorsJsonDeferred = async { getEscalators(PorterSquareId) }
+            val alertsJsonDeferred = async { getEscalatorAlerts(PorterSquareId, *BigEscalatorIds) }
+            val (escalatorsJson, alertsJson) = awaitAll(escalatorsJsonDeferred, alertsJsonDeferred)
 
-        val selectedEscalators = escalatorsJson["data"].filterObjects { it["id"].content() in BigEscalatorIds }
-        val alertedEscalators = alertsJson["data"]?.coerceToArray()
-            ?.associate { it["attributes"]["informed_entity"].findObject { it["stop"].content() == PorterSquareId }["facility"].content() to it["attributes"]["header"] }
+            val selectedEscalators = escalatorsJson["data"].filterObjects { it["id"].content() in BigEscalatorIds }
+            val alertedEscalators = alertsJson["data"]?.coerceToArray()
+                ?.associate { it["attributes"]["informed_entity"].findObject { it["stop"].content() == PorterSquareId }["facility"].content() to it["attributes"]["header"] }
 
-        selectedEscalators?.map { escalatorJson ->
-            val id = escalatorJson["id"].content().orEmpty()
-            val directionString =
-                escalatorJson["attributes"]["properties"].findObject { it["name"].content() == "direction" }["value"].content()
-            val description = escalatorJson["attributes"]["long_name"].content().orEmpty()
-            val alert = alertedEscalators?.get(id).content()
+            val processedEscalators = selectedEscalators?.map { escalatorJson ->
+                val id = escalatorJson["id"].content().orEmpty()
+                val directionString =
+                    escalatorJson["attributes"]["properties"].findObject { it["name"].content() == "direction" }["value"].content()
+                val description = escalatorJson["attributes"]["long_name"].content().orEmpty()
+                val alert = alertedEscalators?.get(id).content()
 
-            Escalator(
-                id = id,
-                description = description,
-                direction = when (directionString) {
-                    "up" -> Escalator.Direction.Up
-                    "down" -> Escalator.Direction.Down
-                    else -> Escalator.Direction.Unknown
-                },
-                isWorking = alert == null,
-                status = alert ?: "WORKING"
-            )
-        }.orEmpty()
+                Escalator(
+                    id = id,
+                    description = description,
+                    direction = when (directionString) {
+                        "up" -> Escalator.Direction.Up
+                        "down" -> Escalator.Direction.Down
+                        else -> Escalator.Direction.Unknown
+                    },
+                    isWorking = alert == null,
+                    status = alert ?: "WORKING"
+                )
+            }.orEmpty()
+
+            EscalatorResponse.Success(processedEscalators)
+        }
+    } catch (_: ResponseException) {
+        EscalatorResponse.Failure
     }
 
     private suspend fun getEscalators(placeId: String): JsonElement = httpClient.get {

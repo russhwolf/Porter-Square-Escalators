@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -23,11 +22,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.kotlinx.coroutinesCore)
+
             implementation(libs.kotlinx.serializationCore)
             implementation(libs.kotlinx.serializationJson)
 
             implementation(libs.ktor.clientCore)
-            implementation(libs.ktor.clientCio)
             implementation(libs.ktor.clientLogging)
             implementation(libs.ktor.clientContentNegotiation)
             implementation(libs.ktor.clientJson)
@@ -44,7 +44,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-
+            implementation(libs.kotlinx.coroutinesTest)
             implementation(libs.ktor.clientMock)
         }
     }

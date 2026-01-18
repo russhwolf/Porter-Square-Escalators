@@ -5,8 +5,11 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
@@ -29,6 +32,7 @@ class MbtaApiClient(engine: HttpClientEngine) {
 
         install(Logging) {
             level = LogLevel.ALL
+            logger = Logger.SIMPLE
         }
 
         install(ContentNegotiation) {
@@ -37,6 +41,12 @@ class MbtaApiClient(engine: HttpClientEngine) {
                     ignoreUnknownKeys = true
                 }
             )
+        }
+
+        defaultRequest {
+            if (BuildConfig.MBTA_API_KEY.isNotEmpty()) {
+                headers["x-api-key"] = BuildConfig.MBTA_API_KEY
+            }
         }
     }
 

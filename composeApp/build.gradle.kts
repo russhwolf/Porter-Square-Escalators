@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.buildConfig)
 }
 
 kotlin {
@@ -57,4 +58,8 @@ kotlin {
     }
 }
 
+buildConfig {
+    packageName("com.russhwolf.escalators")
 
+    buildConfigField("MBTA_API_KEY", properties["MBTA_API_KEY"]?.toString().orEmpty())
+}

@@ -20,7 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -81,7 +84,18 @@ private fun HeaderView(modifier: Modifier = Modifier) {
 
 @Composable
 private fun FooterView(modifier: Modifier = Modifier) {
-    // TODO
+    Text(
+        buildAnnotatedString {
+            withLink(
+                LinkAnnotation.Url(
+                    "https://www.mbta.com/stops/place-portr"
+                )
+            ) { append("More information") }
+        },
+        modifier,
+        style = MaterialTheme.typography.bodySmall,
+        textAlign = TextAlign.Center
+    )
 }
 
 val ColorScheme.success: Color get() = error.copy(red = error.green, green = error.red)

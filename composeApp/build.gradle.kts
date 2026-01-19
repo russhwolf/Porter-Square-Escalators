@@ -54,6 +54,7 @@ kotlin {
         }
         webMain.dependencies {
             implementation(libs.ktor.clientJs)
+            implementation(libs.kotlinx.browser)
         }
     }
 }

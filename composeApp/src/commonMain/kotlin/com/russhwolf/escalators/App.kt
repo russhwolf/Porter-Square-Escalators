@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ColorScheme
@@ -47,26 +48,28 @@ sealed interface UiState {
 fun RootUi(state: UiState) {
     MaterialTheme {
         SelectionContainer {
-            Column(Modifier.fillMaxSize()) {
-                Spacer(Modifier.height(16.dp))
-                HeaderView(Modifier.fillMaxWidth().align(Alignment.CenterHorizontally))
-                Spacer(Modifier.height(16.dp))
-                Box(Modifier.weight(1f).fillMaxWidth()) {
-                    when (state) {
-                        is UiState.Init -> LoadingView(Modifier.align(Alignment.Center))
-                        is UiState.Populated -> when (state.escalatorResponse) {
-                            is EscalatorResponse.Success -> PopulatedView(
-                                state.escalatorResponse.escalators,
-                                Modifier.align(Alignment.Center)
-                            )
+            Box(Modifier.fillMaxSize()) {
+                Column(Modifier.sizeIn(maxWidth = 1024.dp).align(Alignment.Center)) {
+                    Spacer(Modifier.height(16.dp))
+                    HeaderView(Modifier.fillMaxWidth().align(Alignment.CenterHorizontally))
+                    Spacer(Modifier.height(16.dp))
+                    Box(Modifier.weight(1f).fillMaxWidth()) {
+                        when (state) {
+                            is UiState.Init -> LoadingView(Modifier.align(Alignment.Center))
+                            is UiState.Populated -> when (state.escalatorResponse) {
+                                is EscalatorResponse.Success -> PopulatedView(
+                                    state.escalatorResponse.escalators,
+                                    Modifier.align(Alignment.Center)
+                                )
 
-                            is EscalatorResponse.Failure -> ErrorView(Modifier.align(Alignment.Center))
+                                is EscalatorResponse.Failure -> ErrorView(Modifier.align(Alignment.Center))
+                            }
                         }
                     }
+                    Spacer(Modifier.height(16.dp))
+                    FooterView(Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(16.dp))
                 }
-                Spacer(Modifier.height(16.dp))
-                FooterView(Modifier.fillMaxWidth())
-                Spacer(Modifier.height(16.dp))
             }
         }
     }

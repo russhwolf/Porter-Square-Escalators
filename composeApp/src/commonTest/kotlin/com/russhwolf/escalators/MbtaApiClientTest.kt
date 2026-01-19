@@ -99,30 +99,30 @@ private fun MockRequestHandleScope.respondJson(content: String) =
 
 private val Escalator509_Working = Escalator(
     "509",
-    "Porter Escalator 509 (Paid lobby to Ashmont/Braintree platform)",
+    "Paid lobby to Ashmont/Braintree platform",
     Escalator.Direction.Down,
     true,
-    "WORKING"
+    "No alerts"
 )
 private val Escalator509_NotWorking =
     Escalator509_Working.withStatus("Porter Escalator 509 (Paid lobby to Ashmont/Braintree platform) unavailable due to maintenance")
 
 private val Escalator510_Working = Escalator(
     "510",
-    "Porter Escalator 510 (Ashmont/Braintree platform to paid lobby)",
+    "Ashmont/Braintree platform to paid lobby",
     Escalator.Direction.Up,
     true,
-    "WORKING"
+    "No alerts"
 )
 private val Escalator510_NotWorking =
     Escalator510_Working.withStatus("Porter Escalator 510 (Ashmont/Braintree platform to paid lobby) unavailable due to maintenance")
 
 private val Escalator511_Working = Escalator(
     "511",
-    "Porter Escalator 511 (Ashmont/Braintree platform to paid lobby)",
+    "Ashmont/Braintree platform to paid lobby",
     Escalator.Direction.Up,
     true,
-    "WORKING"
+    "No alerts"
 )
 
 private fun Escalator.withStatus(status: String) = copy(isWorking = false, status = status)

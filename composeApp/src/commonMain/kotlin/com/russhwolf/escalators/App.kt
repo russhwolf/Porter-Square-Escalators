@@ -28,20 +28,17 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun App(mbtaApiClient: MbtaApiClient) {
+fun App(mbtaApiClient: MbtaApiClient, reportIsWorking: (isWorking: Boolean) -> Unit = {}) {
     val state = remember { mutableStateOf<UiState>(UiState.Init) }
 
     LaunchedEffect(Unit) {
         val escalatorResponse = mbtaApiClient.getPorterEscalatorStatus()
-        state.value = UiState.Populated(escalatorResponse)
+        val populatedState = UiState.Populated(escalatorResponse)
+        reportIsWorking(populatedState.isWorking)
+        state.value = populatedState
     }
 
     RootUi(state.value)
-}
-
-sealed interface UiState {
-    data object Init : UiState
-    data class Populated(val escalatorResponse: EscalatorResponse) : UiState
 }
 
 @Composable
@@ -59,6 +56,7 @@ fun RootUi(state: UiState) {
                             is UiState.Populated -> when (state.escalatorResponse) {
                                 is EscalatorResponse.Success -> PopulatedView(
                                     state.escalatorResponse.escalators,
+                                    state.isWorking,
                                     Modifier.align(Alignment.Center)
                                 )
 
@@ -89,11 +87,9 @@ private fun HeaderView(modifier: Modifier = Modifier) {
 private fun FooterView(modifier: Modifier = Modifier) {
     Text(
         buildAnnotatedString {
-            withLink(
-                LinkAnnotation.Url(
-                    "https://www.mbta.com/stops/place-portr"
-                )
-            ) { append("More information") }
+            withLink(LinkAnnotation.Url("https://www.mbta.com/stops/place-portr")) {
+                append("More information")
+            }
         },
         modifier,
         style = MaterialTheme.typography.bodySmall,
@@ -104,13 +100,14 @@ private fun FooterView(modifier: Modifier = Modifier) {
 val ColorScheme.success: Color get() = error.copy(red = error.green, green = error.red)
 
 @Composable
-fun PopulatedView(escalators: List<Escalator>, modifier: Modifier = Modifier) {
+fun PopulatedView(escalators: List<Escalator>, isWorking: Boolean, modifier: Modifier = Modifier) {
     Column(modifier) {
         Spacer(Modifier.height(48.dp))
 
-        val (text, color) = when {
-            escalators.all { it.isWorking } -> "YES" to MaterialTheme.colorScheme.success
-            else -> "NO" to MaterialTheme.colorScheme.error
+        val (text, color) = if (isWorking) {
+            "YES" to MaterialTheme.colorScheme.success
+        } else {
+            "NO" to MaterialTheme.colorScheme.error
         }
         Text(
             text,

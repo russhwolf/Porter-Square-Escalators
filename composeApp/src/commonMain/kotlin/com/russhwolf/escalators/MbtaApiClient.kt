@@ -76,7 +76,7 @@ class MbtaApiClient(engine: HttpClientEngine) {
                         else -> Escalator.Direction.Unknown
                     },
                     isWorking = alert == null,
-                    status = alert ?: "WORKING"
+                    status = alert ?: "No alerts"
                 )
             }.orEmpty()
 

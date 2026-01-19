@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -79,12 +81,30 @@ private fun FooterView(modifier: Modifier = Modifier) {
     // TODO
 }
 
+val ColorScheme.success: Color get() = error.copy(red = error.green, green = error.red)
 
 @Composable
 fun PopulatedView(escalators: List<Escalator>, modifier: Modifier = Modifier) {
-    Row(modifier) {
-        escalators.forEach {
-            EscalatorView(it, Modifier.weight(1f).fillMaxSize())
+    Column(modifier) {
+        Spacer(Modifier.height(48.dp))
+
+        val (text, color) = when {
+            escalators.all { it.isWorking } -> "YES" to MaterialTheme.colorScheme.success
+            else -> "NO" to MaterialTheme.colorScheme.error
+        }
+        Text(
+            text,
+            Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center,
+            color = color
+        )
+
+        Spacer(Modifier.height(48.dp))
+        Row(Modifier.fillMaxSize()) {
+            escalators.forEach {
+                EscalatorView(it, Modifier.weight(1f).fillMaxSize())
+            }
         }
     }
 }
@@ -92,7 +112,6 @@ fun PopulatedView(escalators: List<Escalator>, modifier: Modifier = Modifier) {
 @Composable
 fun EscalatorView(escalator: Escalator, modifier: Modifier = Modifier) {
     Column(modifier.padding(8.dp)) {
-        Spacer(Modifier.height(48.dp))
         Text(
             "${escalator.id}: ${escalator.description}",
             Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),

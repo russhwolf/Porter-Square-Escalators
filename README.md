@@ -2,7 +2,7 @@
 
 Status page for the large escalators at Porter Square Station on the MBTA
 
-https://dothe.portersquareescalators.work/
+https://dothe.portersquareescalators.work/  
 https://www.mbta.com/stops/place-portr
 
 ---
